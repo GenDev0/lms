@@ -17,6 +17,7 @@ import ImageForm from "./_components/image-form";
 import CategoryForm from "./_components/category-form";
 import PriceForm from "./_components/price-form";
 import AttachementForm from "./_components/attachement-form";
+import ChaptersForm from "./_components/chapters-form";
 
 interface CourseIdPageProps {
   params: {
@@ -34,8 +35,14 @@ const CourseIdPage = async ({ params: { courseId } }: CourseIdPageProps) => {
   const course = await db.course.findUnique({
     where: {
       id: courseId,
+      userId,
     },
     include: {
+      chapters: {
+        orderBy: {
+          position: "asc",
+        },
+      },
       attachments: {
         orderBy: {
           createdAt: "desc",
@@ -60,12 +67,13 @@ const CourseIdPage = async ({ params: { courseId } }: CourseIdPageProps) => {
     course.imageUrl,
     course.price,
     course.categoryId,
+    course.chapters.some((chapter) => chapter.isPublished),
   ];
 
   const totalFields = requiredFields.length;
   const completedFields = requiredFields.filter(Boolean).length;
 
-  const completionText = `${completedFields} of ${totalFields}`;
+  const completionText = `(${completedFields} of ${totalFields})`;
 
   return (
     <div className='p-6'>
@@ -101,7 +109,9 @@ const CourseIdPage = async ({ params: { courseId } }: CourseIdPageProps) => {
               <IconBadge icon={ListChecks} />
               <h2 className='text-xl'>Course chapters</h2>
             </div>
-            <div>TODO : chapters</div>
+            <div>
+              <ChaptersForm initialData={course} courseId={course.id} />
+            </div>
           </div>
           <div>
             <div className='flex items-center gap-x-2'>

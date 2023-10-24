@@ -4,13 +4,13 @@ import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Pencil } from "lucide-react";
+import { Pencil, PlusCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { cn } from "@/lib/utils";
-import { Course } from "@prisma/client";
+import { Chapter, Course } from "@prisma/client";
 
 import {
   Form,
@@ -21,40 +21,42 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 
-interface DescriptionFormProps {
-  initialData: Course;
+interface ChaptersFormProps {
+  initialData: Course & { chapters: Chapter[] };
   courseId: string;
 }
 
 const formSchema = z.object({
-  description: z.string().min(1, {
-    message: "Description is required",
+  title: z.string().min(1, {
+    message: "Title is required",
   }),
 });
 
-const DescriptionForm = ({ initialData, courseId }: DescriptionFormProps) => {
-  const [isEditing, setIsEditing] = useState(false);
+const ChaptersForm = ({ initialData, courseId }: ChaptersFormProps) => {
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const router = useRouter();
 
-  const toggleEdit = () => {
-    setIsEditing((prevState) => !prevState);
+  const toggleCreating = () => {
+    setIsCreating((prevState) => !prevState);
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      description: initialData?.description || "",
+      title: "",
     },
   });
   const { isSubmitting, isValid } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.patch(`/api/courses/${courseId}`, values);
-      toast.success("Course Updated successfully!");
-      toggleEdit();
+      await axios.post(`/api/courses/${courseId}/chapters`, values);
+      toast.success("Chapter Updated successfully!");
+      toggleCreating();
       router.refresh();
     } catch (error) {
       toast.error("Something went wrong!");
@@ -64,32 +66,21 @@ const DescriptionForm = ({ initialData, courseId }: DescriptionFormProps) => {
   return (
     <div className='mt-6 border bg-slate-100 rounded-md p-4'>
       <div className='font-medium flex items-center justify-between'>
-        Course description
-        <Button type='button' variant={"ghost"} onClick={toggleEdit}>
-          {isEditing ? (
+        Course chapters
+        <Button type='button' variant={"ghost"} onClick={toggleCreating}>
+          {isCreating ? (
             <>
               <span className='underline'>Cancel</span>
             </>
           ) : (
             <>
-              <Pencil className='h-4 w-4 mr-2' />
-              Edit description
+              <PlusCircle className='h-4 w-4 mr-2' />
+              Add a chapter
             </>
           )}
         </Button>
       </div>
-      {!isEditing ? (
-        <p
-          className={cn(
-            "text-sm mt-2",
-            !initialData.description && "text-slate-500 italic"
-          )}
-        >
-          {initialData?.description
-            ? initialData.description
-            : "No description"}
-        </p>
-      ) : (
+      {isCreating && (
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -97,13 +88,13 @@ const DescriptionForm = ({ initialData, courseId }: DescriptionFormProps) => {
           >
             <FormField
               control={form.control}
-              name='description'
+              name='title'
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea
+                    <Input
                       disabled={isSubmitting}
-                      placeholder="e.g. 'You will learn...'"
+                      placeholder="e.g. 'Introduction to the course'"
                       {...field}
                     />
                   </FormControl>
@@ -113,13 +104,29 @@ const DescriptionForm = ({ initialData, courseId }: DescriptionFormProps) => {
             />
             <div className='flex items-center justify-end gap-x-2'>
               <Button disabled={!isValid || isSubmitting} type='submit'>
-                Save
+                Create
               </Button>
             </div>
           </form>
         </Form>
       )}
+      {!isCreating && (
+        <div
+          className={cn(
+            "text-sm mt-2",
+            !initialData.chapters.length && "text-slate-500 italic"
+          )}
+        >
+          {!initialData.chapters.length && "No Chapters"}
+          {/* TODO : Add a list of chapters */}
+        </div>
+      )}
+      {!isCreating && (
+        <p className='text-xs text-muted-foreground mt-4'>
+          Drag & Drop to reorder the chapters
+        </p>
+      )}
     </div>
   );
 };
-export default DescriptionForm;
+export default ChaptersForm;
