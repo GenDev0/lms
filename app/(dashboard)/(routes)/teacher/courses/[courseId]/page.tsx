@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
-import { CircleDollarSign, LayoutDashboard, ListChecks } from "lucide-react";
+import {
+  CircleDollarSign,
+  File,
+  LayoutDashboard,
+  ListChecks,
+} from "lucide-react";
 import { auth, redirectToSignIn } from "@clerk/nextjs";
 
 import { db } from "@/lib/db";
@@ -11,6 +16,7 @@ import DescriptionForm from "./_components/description-form";
 import ImageForm from "./_components/image-form";
 import CategoryForm from "./_components/category-form";
 import PriceForm from "./_components/price-form";
+import AttachementForm from "./_components/attachement-form";
 
 interface CourseIdPageProps {
   params: {
@@ -28,6 +34,13 @@ const CourseIdPage = async ({ params: { courseId } }: CourseIdPageProps) => {
   const course = await db.course.findUnique({
     where: {
       id: courseId,
+    },
+    include: {
+      attachments: {
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
     },
   });
 
@@ -97,6 +110,15 @@ const CourseIdPage = async ({ params: { courseId } }: CourseIdPageProps) => {
             </div>
             <div>
               <PriceForm initialData={course} courseId={course.id} />
+            </div>
+          </div>
+          <div>
+            <div className='flex items-center gap-x-2'>
+              <IconBadge icon={File} />
+              <h2 className='text-xl'>Resources & Attachements</h2>
+            </div>
+            <div>
+              <AttachementForm initialData={course} courseId={course.id} />
             </div>
           </div>
         </div>
