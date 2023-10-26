@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Pencil } from "lucide-react";
@@ -10,7 +10,7 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { cn } from "@/lib/utils";
-import { Course } from "@prisma/client";
+import { Chapter } from "@prisma/client";
 
 import {
   Form,
@@ -21,24 +21,26 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Combobox } from "@/components/ui/combobox";
+import Editor from "@/components/editor";
+import Preview from "@/components/preview";
 
-interface CategoryFormProps {
-  initialData: Course;
+interface ChapterDescriptionFormProps {
+  initialData: Chapter;
   courseId: string;
-  options: { label: string; value: string }[];
+  chapterId: string;
 }
 
 const formSchema = z.object({
-  categoryId: z.string().min(1),
+  description: z.string().min(1),
 });
 
-const CategoryForm = ({
+const ChapterDescriptionForm = ({
   initialData,
   courseId,
-  options,
-}: CategoryFormProps) => {
+  chapterId,
+}: ChapterDescriptionFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const router = useRouter();
 
@@ -49,15 +51,18 @@ const CategoryForm = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      categoryId: initialData?.categoryId || "",
+      description: initialData?.description || "",
     },
   });
   const { isSubmitting, isValid } = form.formState;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.patch(`/api/courses/${courseId}`, values);
-      toast.success("Course Updated successfully!");
+      await axios.patch(
+        `/api/courses/${courseId}/chapters/${chapterId}`,
+        values
+      );
+      toast.success("Chapter Updated successfully!");
       toggleEdit();
       router.refresh();
     } catch (error) {
@@ -65,14 +70,18 @@ const CategoryForm = ({
     }
   };
 
-  const selectedOption = options.find(
-    (option) => option.value === initialData.categoryId
-  );
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <div className='mt-6 border bg-slate-100 rounded-md p-4'>
       <div className='font-medium flex items-center justify-between'>
-        Course category
+        Chapter description
         <Button type='button' variant={"ghost"} onClick={toggleEdit}>
           {isEditing ? (
             <>
@@ -81,20 +90,24 @@ const CategoryForm = ({
           ) : (
             <>
               <Pencil className='h-4 w-4 mr-2' />
-              Edit category
+              Edit description
             </>
           )}
         </Button>
       </div>
       {!isEditing ? (
-        <p
+        <div
           className={cn(
             "text-sm mt-2",
-            !initialData.categoryId && "text-slate-500 italic"
+            !initialData.description && "text-slate-500 italic"
           )}
         >
-          {selectedOption?.label ? selectedOption?.label : "No category"}
-        </p>
+          {initialData?.description ? (
+            <Preview value={initialData.description} />
+          ) : (
+            "No description"
+          )}
+        </div>
       ) : (
         <Form {...form}>
           <form
@@ -103,15 +116,11 @@ const CategoryForm = ({
           >
             <FormField
               control={form.control}
-              name='categoryId'
+              name='description'
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Combobox
-                      options={...options}
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
+                    <Editor onChange={field.onChange} value={field.value} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -128,4 +137,4 @@ const CategoryForm = ({
     </div>
   );
 };
-export default CategoryForm;
+export default ChapterDescriptionForm;
