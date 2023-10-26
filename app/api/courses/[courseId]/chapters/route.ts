@@ -39,7 +39,7 @@ export async function POST(req: Request, { params: { courseId } }: Iparams) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const chapters = await db.chapter.create({
+    const chapter = await db.chapter.create({
       data: {
         title,
         courseId,
@@ -47,7 +47,7 @@ export async function POST(req: Request, { params: { courseId } }: Iparams) {
       },
     });
 
-    return NextResponse.json(chapters);
+    return NextResponse.json(chapter);
   } catch (error) {
     console.log("POST_COURSE_ID_CHAPTERS", error);
     return new NextResponse("Internal Error", { status: 500 });
