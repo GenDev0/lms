@@ -7,7 +7,6 @@ interface Iparams {
     courseId: string;
   };
 }
-
 export async function POST(req: Request, { params: { courseId } }: Iparams) {
   try {
     const { userId } = auth();
