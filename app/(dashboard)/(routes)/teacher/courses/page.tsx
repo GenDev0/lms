@@ -1,7 +1,10 @@
-import { Button } from "@/components/ui/button";
-import { db } from "@/lib/db";
+import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs";
-import Link from "next/link";
+
+import { db } from "@/lib/db";
+
+import { DataTable } from "./_components/data-table";
+import { columns } from "./_components/columns";
 
 interface CoursesPageProps {}
 
@@ -9,25 +12,20 @@ const CoursesPage = async (props: CoursesPageProps) => {
   const { userId } = auth();
 
   if (!userId) {
-    return <div>You must be logged in to view this page</div>;
+    return redirect("/");
   }
   const courses = await db.course.findMany({
     where: {
       userId,
     },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
+
   return (
     <div className='p-6'>
-      <Link href={"/teacher/create"}>
-        <Button>New Course</Button>
-      </Link>
-      <div className='flex flex-col gap-y-2 mt-4 justify-center items-start'>
-        {courses.map((course) => (
-          <Link key={course.id} href={`/teacher/courses/${course.id}`}>
-            {course.title}
-          </Link>
-        ))}
-      </div>
+      <DataTable columns={columns} data={courses} />
     </div>
   );
 };
