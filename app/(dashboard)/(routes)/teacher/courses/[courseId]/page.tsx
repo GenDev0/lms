@@ -19,7 +19,7 @@ import CategoryForm from "./_components/category-form";
 import PriceForm from "./_components/price-form";
 import AttachementForm from "./_components/attachement-form";
 import ChaptersForm from "./_components/chapters-form";
-import CourseActions from "./_components/ccourse-actions";
+import CourseActions from "./_components/course-actions";
 
 interface CourseIdPageProps {
   params: {

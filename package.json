@@ -22,6 +22,7 @@
     "@radix-ui/react-popover": "^1.0.7",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.1.5",
+    "@tanstack/react-table": "^8.10.7",
     "@uploadthing/react": "^5.7.0",
     "axios": "^1.5.1",
     "class-variance-authority": "^0.7.0",
@@ -30,6 +31,7 @@
     "lucide-react": "^0.288.0",
     "next": "latest",
     "react": "latest",
+    "react-confetti": "^6.1.0",
     "react-dom": "latest",
     "react-hook-form": "^7.47.0",
     "react-hot-toast": "^2.4.1",
@@ -37,7 +39,8 @@
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
     "uploadthing": "^5.7.2",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zustand": "^4.4.4"
   },
   "devDependencies": {
     "@types/node": "latest",
