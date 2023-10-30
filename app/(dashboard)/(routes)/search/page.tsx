@@ -1,6 +1,19 @@
+import { db } from "@/lib/db";
+import Categories from "./_components/categories";
+
 interface SearchPageProps {}
 
-const SearchPage = (props: SearchPageProps) => {
-  return <div>Search Page</div>;
+const SearchPage = async (props: SearchPageProps) => {
+  const categories = await db.category.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
+
+  return (
+    <div className='p-6'>
+      <Categories items={categories} />
+    </div>
+  );
 };
 export default SearchPage;
