@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import { LogOut } from "lucide-react";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useAuth } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import SearchInput from "@/components/search-input";
 import { useEffect, useState } from "react";
+import { isTeacher } from "@/lib/teacher";
 
 interface NavbarRoutesProps {}
 
 const NavbarRoutes = (props: NavbarRoutesProps) => {
+  const { userId } = useAuth();
+  const isTeach = isTeacher(userId);
   const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
 
@@ -20,8 +23,12 @@ const NavbarRoutes = (props: NavbarRoutesProps) => {
   const isSearchPage = pathname === "/search";
 
   useEffect(() => {
-    if (!isMounted) return;
+    setIsMounted(true);
   }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <>
@@ -38,13 +45,13 @@ const NavbarRoutes = (props: NavbarRoutesProps) => {
               Exit
             </Button>
           </Link>
-        ) : (
+        ) : isTeach ? (
           <Link href={"/teacher/courses"}>
             <Button size={"sm"} variant={"ghost"}>
               Teacher mode
             </Button>
           </Link>
-        )}
+        ) : null}
         <UserButton afterSignOutUrl='/' />
       </div>
     </>
