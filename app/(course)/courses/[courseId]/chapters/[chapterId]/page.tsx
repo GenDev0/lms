@@ -10,6 +10,7 @@ import VideoPlayer from "./_components/video-player";
 import CourseEnrollButton from "./_components/course-enroll-button";
 import Preview from "@/components/preview";
 import { File } from "lucide-react";
+import CourseProgressButton from "./_components/course-progress-button";
 
 interface ChapterIdPageProps {
   params: {
@@ -75,7 +76,12 @@ const ChapterIdPage = async ({
             <h2 className='text-2xl font-semibold mb-2'>{chapter.title}</h2>
             {purchase ? (
               // TODO: Add CourseProgressButton
-              <span>CourseProgressButton</span>
+              <CourseProgressButton
+                chapterId={chapterId}
+                courseId={courseId}
+                nextChapterId={nextChapter?.id}
+                isCompleted={!!userProgress?.isCompleted}
+              />
             ) : (
               <CourseEnrollButton courseId={courseId} price={course.price!} />
             )}
