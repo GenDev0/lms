@@ -29,7 +29,7 @@ export async function PUT(
         },
       },
       update: {
-        isCompleted: false,
+        isCompleted,
       },
       create: {
         userId,
